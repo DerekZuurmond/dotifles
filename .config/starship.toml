@@ -27,7 +27,6 @@ $time\
 [ ](fg:purple)\
 $line_break$character"""
 right_format = """$azure $memory_usage"""
-
 palette = 'catppuccin_mocha'
 
 [palettes.gruvbox_dark]
