@@ -1,0 +1,66 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[user]
+	name = Derek
+[core]
+	editor = nvim
+  pager = delta
+	autocrlf = input
+[rerere]
+	enabled = true
+[column]
+	ui = auto
+[branch]
+	sort = -committerdate
+[alias]
+	save = !git add -A && git commit -m 'squash: commit save point'
+	com = checkout main
+    lgp = !git log -p --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" --abbrev-commit -30
+    reviewmain = "!f() { git log -p --reverse --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" \"$@\" origin/main...HEAD; }; f"
+    reviewdevelopment = "!f() { git log -p --reverse --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" \"$@\" origin/development...HEAD; }; f"
+    reviewdev = "!f() { git log -p --reverse --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" \"$@\" origin/dev...HEAD; }; f"
+
+    diffmain = "!echo 'Summary of Commits:' && git log --pretty=format:\"%C(magenta)%h%Creset -%C(yellow)%d%Creset %s %C(green)(%cr) [%an]\" origin/main...HEAD && echo 'Combined Diff:' && git diff --color=always --word-diff=color origin/main...HEAD"
+    diffdevelopment = "!echo 'Summary of Commits:' && git log --pretty=format:\"%C(magenta)%h%Creset -%C(yellow)%d%Creset %s %C(green)(%cr) [%an]\" origin/development...HEAD && echo 'Combined Diff:' && git diff --color=always --word-diff=color origin/development...HEAD"
+    diffdev = "!echo 'Summary of Commits:' && git log --pretty=format:\"%C(magenta)%h%Creset -%C(yellow)%d%Creset %s %C(green)(%cr) [%an]\" origin/dev...HEAD && echo 'Combined Diff:' && git diff --color=always --word-diff=color origin/dev...HEAD"
+
+	cob = checkout -b
+	undo = reset HEAD~1 --mixed
+    pick = "!f() { git log --pretty=oneline --abbrev-commit $@ | fzf --height 50% --reverse | cut -d' ' -f1 | xargs -r git checkout; }; f"
+	br = branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]' --sort=-committerdate
+	lg = !git log --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" --abbrev-commit -30
+	diff-words = diff --color-words='[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+'
+    pr = "!f() { git checkout dev && git pull && git checkout -b pr-$1 && git pull --force origin $1; }; f"
+    pr-main = "!f() { git checkout main && git pull && git checkout -b pr-main-$1 && git pull --force origin $1; }; f"
+	test-merge = "fzfp() { git fetch origin  && git merge --no-commit --no-ff origin/; if [ 0 -eq 0 ]; then echo 'No conflicts detected merging  into development'; git merge --abort; else echo 'Conflicts detected! Merge aborted.'; fi; }; f"
+	st = status -s
+	conf = config --global --edit
+	edit = commit -a --amend
+	forgot = edit --no-edit 
+
+
+[init]
+    defaultBranch = main
+
+[credential]
+	useHttpPath = true
+	helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true
+    line-numbers = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+
+
+
