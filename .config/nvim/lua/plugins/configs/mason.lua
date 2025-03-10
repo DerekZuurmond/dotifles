@@ -1,5 +1,5 @@
 local options = {
-  ensure_installed = { "lua-language-server" , "pyright", "ruff", "black", "mypy", "azure-pipelines-ls", "sqlfluff"}, -- not an option from mason.nvim
+  ensure_installed = { "lua-language-server" , "pyright", "ruff", "black", "mypy", "azure-pipelines-ls", "sqlfluff" , "yamlls", "yamllint", "sqlfluff", "sqlls" },
 
   PATH = "skip",
 

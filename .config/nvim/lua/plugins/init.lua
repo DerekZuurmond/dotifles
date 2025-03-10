@@ -256,6 +256,7 @@ local default_plugins = {
   config = function()
       local null_ls = require("null-ls")
 
+
 null_ls.setup({
   sources = {
     -- -- Ruff for linting and autofixing
@@ -267,6 +268,7 @@ null_ls.setup({
     null_ls.builtins.formatting.black.with({
       command = vim.fn.stdpath("data") .. "/mason/bin/black",
     }),
+
     -- Mypy for type checking
     null_ls.builtins.diagnostics.mypy.with({
       command = vim.fn.stdpath("data") .. "/mason/bin/mypy",
@@ -301,6 +303,57 @@ null_ls.setup({
         end,
     },
 
+
+  {
+    "christoomey/vim-tmux-navigator",
+    lazy = false,
+  },
+
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = function() vim.fn["mkdp#util#install"]() end,
+},
+
+-- {
+--   "rcarriga/nvim-notify",
+--   config = function()
+--     require("notify").setup({
+--       enable = false,   -- The boolean value indicating whether to enable the plugin
+--     })
+--   end,
+-- },
+
+{ "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+{
+  "folke/noice.nvim",
+  event = "VeryLazy",
+  opts = {
+    -- add any options here
+  },
+  dependencies = {
+    -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+    "MunifTanjim/nui.nvim",
+    -- OPTIONAL:
+    --   `nvim-notify` is only needed, if you want to use the notification view.
+    --   If not available, we use `mini` as the fallback
+    "rcarriga/nvim-notify",
+  }
+},
+
+
+{
+  "folke/todo-comments.nvim",
+  dependencies = { "nvim-lua/plenary.nvim" },
+  opts = {
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+  }
+},
+
+
 {
   "github/copilot.vim",
   lazy = false,
@@ -320,9 +373,93 @@ null_ls.setup({
          -- Add your configuration here if needed
       })
    end,
+},
+
+
+{
+    "yetone/avante.nvim",
+    event = "VeryLazy",
+    lazy = false,
+    version = false, -- Always pull the latest changes
+    opts = {
+      provider = "copilot", -- Set GitHub Copilot as the provider
+      auto_suggestions_provider = "copilot", -- Use Copilot for auto-suggestions
+      copilot = {
+        -- Additional configuration for Copilot, if needed
+      },
+      behaviour = {
+        auto_suggestions = true, -- Enable auto-suggestions
+        auto_set_highlight_group = true,
+        auto_set_keymaps = true,
+        auto_apply_diff_after_generation = true,
+        support_paste_from_clipboard = false,
+        minimize_diff = true,
+      },
+      mappings = {
+            sidebar = {
+      apply_all = "<leader>A",
+      apply_cursor = "a",
+      switch_windows = "<Tab>",
+      reverse_switch_windows = "<S-Tab>",
+      remove_file = "d",
+      add_file = "@",
+    },
+        -- Customize key mappings as needed
+      },
+      -- Additional configuration options...
+    },
+    build = "make", -- Build the plugin
+    dependencies = {
+      "stevearc/dressing.nvim",
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      -- Optional dependencies
+      "hrsh7th/nvim-cmp", -- Autocompletion for avante commands and mentions
+      "nvim-tree/nvim-web-devicons", -- File icons
+      {
+        "zbirenbaum/copilot.lua", -- GitHub Copilot integration
+        config = function()
+          require("copilot").setup({
+            suggestion = { enabled = false },
+            panel = { enabled = false },
+          })
+        end,
+      },
+    },
+  },
+
+{
+  "linux-cultist/venv-selector.nvim",
+    dependencies = {
+      "neovim/nvim-lspconfig",
+      "mfussenegger/nvim-dap", "mfussenegger/nvim-dap-python", --optional
+      { "nvim-telescope/telescope.nvim", branch = "0.1.x", dependencies = { "nvim-lua/plenary.nvim" } },
+    },
+  lazy = false,
+  branch = "regexp", -- This is the regexp branch, use this for the new version
+  config = function()
+      require("venv-selector").setup()
+    end,
+    keys = {
+      { ",v", "<cmd>VenvSelect<cr>" },
+    },
+},
+--
+{'akinsho/git-conflict.nvim', version = "*", config = {
+  default_mappings = true, -- disable buffer local mapping created by this plugin
+  default_commands = true, -- disable commands created by this plugin
+  disable_diagnostics = false, -- This will disable the diagnostics in a buffer whilst it is conflicted
+  list_opener = 'copen', -- command or function to open the conflicts list
+  highlights = { -- They must have background color, otherwise the default color will be used
+    incoming = 'DiffAdd',
+    current = 'DiffText',
+  }
+}
+  }
 }
 
-}
+
+
 
 local config = require("core.utils").load_config()
 
@@ -330,7 +467,29 @@ if #config.plugins > 0 then
   table.insert(default_plugins, { import = config.plugins })
 end
 
-require("lazy").setup(default_plugins, config.lazy_nvim)
+
+local plugins = {
+   -- Add lazygit.nvim and telescope.nvim with dependencies
+   {
+      "kdheepak/lazygit.nvim",
+      dependencies = {
+         "nvim-telescope/telescope.nvim",
+         "nvim-lua/plenary.nvim"
+      },
+      config = function()
+         require("telescope").load_extension("lazygit")
+      end,
+   },
+}
+
+-- vim.api.nvim_create_autocmd("BufEnter", {
+--    callback = function()
+--       require("lazygit.utils").project_root_dir()
+--    end
+-- })
+
+
+require("lazy").setup(default_plugins, plugins, config.lazy_nvim)
 
 require('refactoring').setup({})
 
@@ -351,7 +510,7 @@ require('refactoring').setup({})
 --
 
 require("mason-lspconfig").setup {
-    ensure_installed = { "lua_ls", "azure_pipelines_ls" , "sqlls"},
+    ensure_installed = { "lua_ls", "azure_pipelines_ls"},
 }
 
 require("lspconfig").azure_pipelines_ls.setup {
@@ -370,5 +529,12 @@ require("lspconfig").azure_pipelines_ls.setup {
   },
 }
 
-require'lspconfig'.sqls.setup{}
-require'lspconfig'.sqlls.setup{}
+require'lspconfig'.yamlls.setup{}
+require("venv-selector").workspace_paths()
+require("venv-selector").file_dir()
+require("venv-selector").cwd()
+-- local notify = require("notify")
+--
+-- -- Set as default notification system
+-- vim.notify = notify
+

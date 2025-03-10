@@ -7,6 +7,7 @@ case $- in
     *i*) ;;
       *) return;;
 esac
+export PATH=$PATH:/usr/bin:/usr/local/bin
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -249,7 +250,7 @@ locate_vim() {
     read -p "Enter the number of the file to open: " file_number
     file=$(echo "$results" | sed -n "${file_number}p")
     if [ -n "$file" ]; then
-      vim "$file"
+      nvim "$file"
     else
       echo "Invalid selection."
     fi
@@ -278,7 +279,7 @@ unset STARSHIP_CONFIG
 unset STARSHIP_CONFIG
 export STARSHIP_CONFIG=~/.config/starship.toml
 # Remove or adjust any recursive sourcing or problematic functions
-eval "$(zoxide init --cmd cd zsh)"
+# eval "$(zoxide init --cmd cd zsh)"
 
 
 
@@ -303,3 +304,126 @@ source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 function set_win_title(){
     echo -ne "\033]0; $(basename "$PWD") \007"
 }
+alias lg='lazygit'
+alias tmux="TERM=screen-256color-bce tmux"
+alias tmux='tmux -2'
+export TERM="xterm-256color"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+
+
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
+
+  fpath=(path/to/zsh-completions/src $fpath)
+
+eval "$(zoxide init --cmd cd zsh)"
+export PATH="/home/derek/.pixi/bin:$PATH"
+
+
+
+pg_login() {
+    PGHOST="psql-dtp-001.postgres.database.azure.com"
+    PGDATABASE="postgres"
+    PGUSER="analyze-dtp-admin"
+    export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms | jq -r '.accessToken')
+    psql -h $PGHOST -U $PGUSER -d $PGDATABASE
+}
+
+
+
+
+# Add this function to your ~/.zshrc file
+function upload_geojson() {
+  local geojson_file="$1"
+  local table_name="$2"
+  local db_name="$3"
+
+  # Set your connection parameters
+  PGHOST="psql-dtp-001.postgres.database.azure.com"
+  PGPORT="5432"
+  PGUSER="derek.zuurmond@Analyze.nl"
+
+  # Retrieve and export the Azure AD access token for PostgreSQL
+  PGPASSWORD=$(az account get-access-token --resource https://ossrdbms-aad.database.windows.net | jq -r '.accessToken')
+  export PGPASSWORD
+
+  # Run ogr2ogr to load the GeoJSON into PostGIS
+  ogr2ogr \
+    -f "PostgreSQL" \
+    PG:"host=$PGHOST port=$PGPORT user=$PGUSER dbname=$db_name password=$PGPASSWORD" \
+    "$geojson_file" \
+    -nln "$table_name" \
+    -lco GEOMETRY_NAME=geom \
+    -lco FID=gid
+}
+
+
+function copy_table() {
+  local source_db="$1"
+  local target_db="$2"
+  local source_table="$3"
+  local target_table="$4"
+
+  # Set PostgreSQL connection parameters
+  PGHOST="psql-dtp-001.postgres.database.azure.com"
+  PGPORT="5432"
+  PGUSER="derek.zuurmond@Analyze.nl"
+
+  # Retrieve and export the Azure AD access token for PostgreSQL
+  PGPASSWORD=$(az account get-access-token --resource https://ossrdbms-aad.database.windows.net | jq -r '.accessToken')
+  export PGPASSWORD
+  echo "Table $source_table being copied to $target_table in database $target_db"
+
+  # Use ogr2ogr to copy data from source to target database
+  ogr2ogr \
+    -f "PostgreSQL" \
+    PG:"host=$PGHOST port=$PGPORT user=$PGUSER dbname=$target_db password=$PGPASSWORD" \
+    PG:"host=$PGHOST port=$PGPORT user=$PGUSER dbname=$source_db password=$PGPASSWORD" \
+    -sql "SELECT * FROM $source_table" \
+    -nln "$target_table" \
+    -overwrite
+
+  echo "Table $source_table copied to $target_table in database $target_db"
+}
+
+
+function copy_query_result() {
+  local source_db="$1"
+  local target_db="$2"
+  local query="$3"
+  local target_table="$4"
+
+  # Set PostgreSQL connection parameters
+  PGHOST="psql-dtp-001.postgres.database.azure.com"
+  PGPORT="5432"
+  PGUSER="derek.zuurmond@Analyze.nl"
+
+  # Retrieve and export the Azure AD access token for PostgreSQL
+  PGPASSWORD=$(az account get-access-token --resource https://ossrdbms-aad.database.windows.net | jq -r '.accessToken')
+  export PGPASSWORD
+
+  # Use ogr2ogr to copy the query result to the target database
+  ogr2ogr \
+    -f "PostgreSQL" \
+    PG:"host=$PGHOST port=$PGPORT user=$PGUSER dbname=$target_db password=$PGPASSWORD" \
+    PG:"host=$PGHOST port=$PGPORT user=$PGUSER dbname=$source_db password=$PGPASSWORD" \
+    -sql "$query" \
+    -nln "$target_table" \
+    -overwrite
+
+  echo "Query result copied to $target_table in database $target_db"
+}
+
+eval $(thefuck --alias)

@@ -140,7 +140,8 @@ format = '[[($all_status$ahead_behind )](fg:base bg:green)]($style)'
 
 
 [git_state]
-format = '[\($state( $progress_current of $progress_total)\)]($style) '
+style = "fg:base bg:green"
+format = '[\($state( $progress_current of $progress_total)\)]($style)'
 cherry_pick = '[🍒 PICKING](bold red)'
 
 [git_metrics]

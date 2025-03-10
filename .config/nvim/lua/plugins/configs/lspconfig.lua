@@ -81,6 +81,7 @@ require("lspconfig").pyright.setup {
   },
 }
 
+
 require('lspconfig').ruff.setup({})
 local null_ls = require("null-ls")
 
@@ -115,6 +116,8 @@ null_ls.setup({
   end,
 })
 
+
+require'lspconfig'.sqlls.setup{}
 
 
 return M

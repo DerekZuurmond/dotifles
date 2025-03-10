@@ -1,5 +1,7 @@
 -- n, v, i, t = mode names
-
+-- vim.keymap.set("n", "<leader>rs", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+-- vim.keymap.set('n', '<leader>r', [[:%s/\<<C-r><C-w>\>//g<Left><Left>]], { noremap = true })
+vim.keymap.set('n', 'rr', ':%s/\\<<C-r><C-w>\\>//g<Left><Left>', { noremap = true })
 local M = {}
 
 M.general = {
@@ -16,18 +18,26 @@ M.general = {
     ["<C-l>"] = { "<Right>", "Move right" },
     ["<C-j>"] = { "<Down>", "Move down" },
     ["<C-k>"] = { "<Up>", "Move up" },
+
+
   },
 
   n = {
     ["<Esc>"] = { "<cmd> noh <CR>", "Clear highlights" },
     ["py"] = { ":!python3 %<CR>", "Run Python file" },
+    ["mpy"] =  { ":!python3 -m %:p:r | sed 's|/|.|g' | sed 's|\\.py$||' | sed 's|^.*src|src|' <CR>", "Run Python file as module" },
     ["<leader>v"] = { "<C-w>v<C-w>l", "Vertical split and move right" },
     -- ["<Esc>"] = { "<NOP>", "Disable Escape" },
     -- switch between windows
-    ["<C-h>"] = { "<C-w>h", "Window left" },
-    ["<C-l>"] = { "<C-w>l", "Window right" },
-    ["<C-j>"] = { "<C-w>j", "Window down" },
-    ["<C-k>"] = { "<C-w>k", "Window up" },
+    -- ["<C-h>"] = { "<C-w>h", "Window left" },
+    -- ["<C-l>"] = { "<C-w>l", "Window right" },
+    -- ["<C-j>"] = { "<C-w>j", "Window down" },
+    -- ["<C-k>"] = { "<C-w>k", "Window up" },
+    ["<C-h>"]= {"<cmd> TmuxNavigateLeft<CR>", "window left"},
+    ["<C-j>"]= {"<cmd> TmuxNavigateDown<CR>", "window down"},
+    ["<C-k>"]= {"<cmd> TmuxNavigateUp<CR>", "window up"},
+    ["<C-l>"]= {"<cmd> TmuxNavigateRight<CR>", "window right"},
+
 
     ["<C-d>"] = { "<C-d>zz", "Scroll down and center" },
     ["<C-u>"] = { "<C-u>zz", "Scroll up and center" },
@@ -291,6 +301,7 @@ M.telescope = {
     -- git
     ["<leader>cm"] = { "<cmd> Telescope git_commits <CR>", "Git commits" },
     ["<leader>gt"] = { "<cmd> Telescope git_status <CR>", "Git status" },
+    ["<leader>lg"] = { "<cmd> Telescope lazygit <CR>", "Open LazyGit" }, -- Add this line
 
     -- pick a hidden term
     ["<leader>pt"] = { "<cmd> Telescope terms <CR>", "Pick hidden term" },

@@ -37,3 +37,8 @@ if vim.fn.executable(clip) == 1 then
 end
 
 vim.opt.relativenumber = true -- Show relative line numbersize
+vim.opt.laststatus = 3 -- Always show status line
+if vim.fn.has("termguicolors") == 1 then
+  vim.opt.termguicolors = true
+end
+
